@@ -1,0 +1,73 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int     @id @default(autoincrement())
+  username    String  @db.VarChar(32) @unique
+  password    String  @db.VarChar(32)
+  income      Income[]
+  outcome     Outcome[]
+  wallet      Wallet[]
+  budgetRule  BudgetRule[]
+}
+
+model Income {
+  id        Int       @id @default(autoincrement())
+  name      String    @db.VarChar(32)
+  amount    Int
+  date      DateTime  @db.Date
+  user      User      @relation(fields: [userId], references: [id])
+  userId    Int
+  wallet    Wallet    @relation(fields: [walletId], references: [id])
+  walletId  Int
+}
+
+model Outcome {
+  id          Int       @id @default(autoincrement())
+  name        String    @db.VarChar(32)
+  amount      Int
+  date        DateTime  @db.Date
+  user        User      @relation(fields: [userId], references: [id])
+  userId      Int
+  wallet      Wallet    @relation(fields: [walletId], references: [id])
+  walletId    Int
+  category    Category  @relation(fields: [categoryId], references: [id])
+  categoryId  Int
+}
+
+model Wallet {
+  id        Int       @id @default(autoincrement())
+  name      String    @db.VarChar(32)
+  balance   Int
+  user      User      @relation(fields: [userId], references: [id])
+  userId    Int
+  income    Income[]
+  outcome   Outcome[]
+}
+
+model BudgetRule {
+  id          Int       @id @default(autoincrement())
+  name        String    @db.VarChar(32)
+  percentage  Int
+  user        User      @relation(fields: [userId], references: [id])
+  userId      Int
+  category    Category[]
+}
+
+model Category {
+  id            Int         @id @default(autoincrement())
+  name          String      @db.VarChar(32)
+  budget        Int
+  budgetRule    BudgetRule  @relation(fields: [budgetRuleId], references: [id])
+  budgetRuleId  Int
+  outcome       Outcome[]
+}
